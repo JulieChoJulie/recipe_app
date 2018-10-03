@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+{{category.name}}
+{{item.name}}
+
+<form method="post" action="{{url_for('editMenu', category_id=category.id, menu_id=item.id)}}">
+    <span>Name</span><input name="name" value="{{item.name}}">
+    <span>Calories/Serving</span><input name="calories" value="{{item.calories}}">
+    <span>Servings</span><input name="servings" value="{{item.servings}}">
+    <span>Hour</span><input name="hour" value="{{item.hour}}">
+    <span>Minute</span><input name="minute" value="{{item.minute}}">
+    <span><img src="{{item.picture}}"></span>
+    <span>Picture SRC</span><input name="picture" value="{{item.picture}}">
+
+    {% if ingredients.description %}
+    {% for ingredient in ingredients %}
+			<div class="row">
+				<div class="col-md-1"></div>
+					<div class="col-md-10">
+                        <h3><span>Ingredient-Amount: </span>{{ingredient.amount}}</h3><a href="{{url_for('editIng', ingredient_id=ingredient.id)}}">Edit</a><a href="{{url_for('deleteIng', ingredient_id=ingredient.id)}}">Delete</a>
+                        <h3><span>Ingredient-Description: </span>{{ingredient.description}}</h3><a href="{{url_for('editIng', ingredient_id=ingredient.id)}}">Edit</a><a href="{{url_for('deleteIng', ingredient_id=ingredient.id)}}">Delete</a>
+					</div>
+				<div class="col-md-1"></div>
+			</div>
+    {% endfor %}
+    {% else %}
+    <div class="addIng">
+        Add Ingredient
+    </div>
+    {% endif %}
+
+    {% if directions.direction %}
+        {% for direction in directions %}
+                <div class="row">
+                    <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <h3>{{direction.direction}}</h3>
+                        </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+        {% endfor %}
+    {% else %}
+        <div class="addDir">Add Direction</div>
+    {% endif %}
+
+    </br>
+
+<a href="{{url_for('menuDetails', category_id=category.id, menu_id=item.id)}}">Cancel</a>
+<input type="submit" value="Submit">
+</form>
+
+<script>
+
+
+    $(document).ready(function() {
+        $('.addIng').on('click', function(){
+        $('.addIng').after("<span>Amount: </span><input name=\"amount\"><span>Description: </span><input name=\"description\"></br>");
+    })
+
+        $('.addDir').on('click', function(){
+        $('.addDir').after("<span>Direction: </span><input name=\"direction\"></br>");
+    })
+    });
+</script>
+</body>
+</html>

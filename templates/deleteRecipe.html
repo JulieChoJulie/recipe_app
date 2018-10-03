@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{{url_for('deleteRecipe', category_id=category.id)}}" method="post">
+        <h3>Category name: {{category.name}}</h3>
+        <a href="{{url_for('recipeList')}}">Cancel</a>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

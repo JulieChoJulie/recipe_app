@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{{url_for('newMenu', category_id=category.id)}}" method="post">
+        <h3>Adding New Menu under {{category.name}}</h3>
+        <span>Name: </span><input type="text" name="name">
+        <span>Servings: </span><input type="text" name="servings">
+        <span>Calories/Serving: </span><input type="text" name="calories">
+        <span>Picture: </span><input type="text" name="picture">
+        <span>Total Time</span>
+        <span>Hour: </span><input type="text" name="hour">
+        <span>Minute: </span><input type="text" name="minute">
+        <span>Ingredients-amount: </span><input type="text" name="amount">
+        <span>Ingredients-description: </span><input type="text" name="description">
+        <span>Directions: </span><input type="text" name="direction">
+
+
+
+        <a href="{{url_for('menuList', category_id=category.id)}}">Cancel</a>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

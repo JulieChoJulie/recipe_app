@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<h1>{{item.name}}</h1>
+<span><img src="{{item.picture}}" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';"></span>
+
+<a href = "{{url_for('editMenu', category_id = category_id, menu_id=item.id)}}">Edit this menu</a>
+<a href = "{{url_for('deleteMenu', category_id = category_id, menu_id=item.id)}}">Delete this menu</a>
+
+</br>
+<h3>{{item.calories}} calories/serving</h3>
+<h3>{{item.servings}} servings</h3>
+<h3>{{item.hour}} hour</h3>
+<h3>{{item.minute}} minute</h3>
+</br>
+<h2>Ingredients</h2>
+	{% for ingredient in ingredients %}
+				<div class="row">
+					<div class="col-md-1"></div>
+						<div class="col-md-10">
+							<h3>{{ingredient.amount}}</h3>
+							<h3>{{ingredient.description}}</h3>
+						</div>
+					<div class="col-md-1"></div>
+				</div>
+
+	{% endfor %}
+
+</br>
+<h2>Directions</h2>
+{% for direction in directions %}
+			<div class="row">
+				<div class="col-md-1"></div>
+					<div class="col-md-10">
+						<h3>{{direction.direction}}</h3>
+					</div>
+				<div class="col-md-1"></div>
+			</div>
+
+{% endfor %}
+</body>
+</html>
