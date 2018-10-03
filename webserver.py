@@ -114,9 +114,10 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    if getUserID(login_session['email']) is None:
-        createUser(login_session)
-    login_session['user_id'] = getUserID(login_session['email'])
+    user_id = getUserID(login_session['email'])
+    if user_id is None:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
 
     output = ''
     output += '<h1>Welcome, '
@@ -181,8 +182,16 @@ def newRecipe():
 def menuList(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Menu).filter_by(category_id=category_id).all()
-    creator = session.query(User).filter_by(id=category.user_id).one()
-    if login_session.get('username') == creator.name:
+    creator = getUserInfo(category.user_id)
+    print creator.id
+    print login_session.get('user_id')
+    list = category.name.split()
+    if list[0][0].isdigit():
+        del list[0]
+        category.name = " ".join(list)
+        session.add(category)
+        session.commit()
+    if login_session.get('user_id') == creator.id:
         return render_template('menu.html', category=category, category_id=category_id, items=items)
     elif 'username' in login_session:
         return render_template('userMenu.html', category=category, category_id=category_id, items=items)
@@ -216,6 +225,9 @@ def newMenu(category_id):
 @app.route('/recipes/<int:category_id>/edit/', methods=['GET', 'POST'])
 def editRecipe(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
+    if category.user_id != login_session.get('user_id'):
+        return "<script>function myFunction() {alert('You are not authorized to edit this category.');}</script><body onload='myFunction()'>"
+
     if request.method == 'POST':
         category.name = request.form['name']
         session.add(category)
@@ -227,6 +239,9 @@ def editRecipe(category_id):
 @app.route('/recipes/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteRecipe(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
+    if category.user_id != login_session.get('user_id'):
+        return "<script>function myFunction() {alert('You are not authorized to delete this category.');}</script><body onload='myFunction()'>"
+
     if request.method == 'POST':
         session.delete(category)
         session.commit()
@@ -239,7 +254,8 @@ def menuDetails(category_id, menu_id):
     item = session.query(Menu).filter_by(id=menu_id).one()
     ingredients = session.query(Ingredient).filter_by(menu_id=item.id).first()
     directions = session.query(Direction).filter_by(menu_id=item.id).first()
-    creator = session.query(User).filter_by(id=item.user_id).one()
+    creator = getUserInfo(item.user_id)
+
     if directions is not None:
         directions = session.query(Direction).filter_by(menu_id=item.id).all()
     else:
@@ -249,7 +265,8 @@ def menuDetails(category_id, menu_id):
     else:
         ingredients = []
 
-    if creator.name == login_session.get('username'):
+    if creator.id == login_session.get('user_id'):
+        print "here"
         return render_template('menuDetails.html', category_id=category_id, item=item, ingredients=ingredients, directions=directions)
     else:
         return render_template('publicMenuDetails.html', category_id=category_id, item=item, ingredients=ingredients, directions=directions)
@@ -261,6 +278,9 @@ def editMenu(category_id, menu_id):
     item = session.query(Menu).filter_by(id=menu_id).one()
     ingredients = session.query(Ingredient).filter_by(menu_id=item.id).first()
     directions = session.query(Direction).filter_by(menu_id=item.id).first()
+    if item.user_id != login_session.get('user_id'):
+        return "<script>function myFunction() {alert('You are not authorized to edit this menu.');}</script><body onload='myFunction()'>"
+
     if directions is not None:
         directions = session.query(Direction).filter_by(menu_id=item.id).all()
     else:
@@ -321,8 +341,10 @@ def deleteMenu(category_id, menu_id):
     ingredients = session.query(Ingredient).filter_by(menu_id=menu_id).all()
     directions = session.query(Direction).filter_by(menu_id=menu_id).all()
     menu = session.query(Menu).filter_by(id=menu_id).one_or_none()
-
     category = session.query(Category).filter_by(id=category_id).one()
+    if menu.user_id != login_session.get('user_id'):
+        return "<script>function myFunction() {alert('You are not authorized to delete this menu.');}</script><body onload='myFunction()'>"
+
     if request.method == 'POST':
         session.delete(menu)
         session.commit()
@@ -341,9 +363,11 @@ def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session['email'], picture=login_session['picture'])
     session.add(newUser)
     session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
 
-def getUserInfo(login_session):
-    user = session.query(User).filter_by(name=login_session['username']).one()
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
     return user
 
 def getUserID(email):

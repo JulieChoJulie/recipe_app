@@ -27,7 +27,7 @@ with open('{}/recipes-data.json'.format(path), 'r') as f:
 
 
 # Add Fake User
-User1 = User(name="Julie Cho", email="h32cho@gmail.com",
+User1 = User(name="Admin", email="h32cho_admin@gmail.com",
              picture='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png')
 session.add(User1)
 session.commit()
