@@ -21,6 +21,14 @@ class Category(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'name': self.name
+        }
+
 class Menu(Base):
     __tablename__ = 'menu'
     id = Column(Integer, primary_key = True)
@@ -35,6 +43,20 @@ class Menu(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'picture': self.picture,
+            'servings': self.servings,
+            'calories': self.calories,
+            'hour': self.hour,
+            'minute': self.minute,
+            'category_id': self.category_id,
+            'user_id': self.user_id
+        }
+
 class Ingredient(Base):
     __tablename__ = 'ingredient'
     id = Column(Integer, primary_key = True)
@@ -43,12 +65,27 @@ class Ingredient(Base):
     menu_id = Column(Integer, ForeignKey('menu.id'))
     menu = relationship(Menu)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'amount': self.amount,
+            'description': self.description,
+        }
+
 class Direction(Base):
     __tablename__ = 'direction'
     id = Column(Integer, primary_key = True)
     direction = Column(String(350))
     menu_id = Column(Integer, ForeignKey('menu.id'))
     menu = relationship(Menu)
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'direction': self.direction,
+        }
 
 engine = create_engine('sqlite:///recipes.db')
 Base.metadata.create_all(engine)
