@@ -30,10 +30,10 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <!--<a class="nav-link" href="#">Home-->
-                <!--<span class="sr-only">(current)</span>-->
-              <!--</a>-->
-            <!--</li>-->
+              <a class="nav-link" href="{{url_for('recipeList')}}">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
             <!--<li class="nav-item">-->
               <!--<a class="nav-link" href="#">About</a>-->
             <!--</li>-->
@@ -41,7 +41,7 @@
               <!--<a class="nav-link" href="#">Services</a>-->
             <!--</li>-->
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('gdisconnect')}}">Logout</a>
+              <a class="nav-link" href="{{url_for('showLogin')}}">Login</a>
             </li>
           </ul>
         </div>
@@ -50,78 +50,52 @@
 
     <!-- Page Content -->
     <div class="container">
+      	{% with messages = get_flashed_messages() %}
+    		{% if messages %}
+    		<ul class="flashes list-group">
+        		{% for message in messages %}
+            	<li class="list-group-item"> <strong> {{ message }} </strong> </li>
+        		{% endfor %}
+        	</ul>
+        	{% endif %}
+    	{% endwith %}
 
       <!-- Jumbotron Header -->
-      <header class="jumbotron my-4">
+      <header class="jumbotron my-4 text-center">
         <h3 class="display-5">Weekly Dinner Planner</h3>
-        <div class="row plans">
-        {% for el in list %}
-        <div class="col-lg-3 col-md-4 col-sm-4">
-          <h6>{{dates.pop()}}</h6>
-          <span><a href="{{url_for('menuDetails', category_id=el.category_id, menu_id=el.id)}}"><img name='{{el.name}}' src="{{el.picture}}" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';" width="100%"></a></span>
-          {{el.name}}
-        </div>
-        {% endfor %}
+        <div class="row">
+          <p class="lead tap">  Please login to build your own dinner planner!</p>
         </div>
 
         <!--<p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, ipsam, eligendi, in quo sunt possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam repellat.</p>-->
-        <a href="{{url_for('refresh')}}" class="btn btn-primary btn-lg">Refresh Planner!</a>
+        <a href="{{url_for('showLogin')}}" class="btn btn-primary btn-md">Go to Login Page!</a>
       </header>
 
+
       <!-- Page Features -->
+      <h3 class="display-4 text-center">Recipe Categories</h3>
+
+
       <div class="row text-center">
+        {% for category in categories %}
+          <div class="col-lg-4 col-md-6 mb-4">
 
-        <div class="col-lg-3 col-md-6 mb-4">
           <div class="card">
-            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+            <img class="card-img-top" src="{{pic.pop()}}" alt="food-photo" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';">
             <div class="card-body">
-              <h4 class="card-title">Card title</h4>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
+              <h4 class="card-title">{{category.name}}</h4>
             </div>
             <div class="card-footer">
-              <a href="#" class="btn btn-primary">Find Out More!</a>
+              <a href="{{url_for('menuList', category_id = category.id)}}" class="btn btn-primary">Find Out More!</a>
             </div>
           </div>
-        </div>
+          </div>
+        {% endfor %}
 
-        <div class="col-lg-3 col-md-6 mb-4">
-          <div class="card">
-            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
-            <div class="card-body">
-              <h4 class="card-title">Card title</h4>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
-            </div>
-            <div class="card-footer">
-              <a href="#" class="btn btn-primary">Find Out More!</a>
-            </div>
-          </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6 mb-4">
-          <div class="card">
-            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
-            <div class="card-body">
-              <h4 class="card-title">Card title</h4>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
-            </div>
-            <div class="card-footer">
-              <a href="#" class="btn btn-primary">Find Out More!</a>
-            </div>
-          </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6 mb-4">
-          <div class="card">
-            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
-            <div class="card-body">
-              <h4 class="card-title">Card title</h4>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
-            </div>
-            <div class="card-footer">
-              <a href="#" class="btn btn-primary">Find Out More!</a>
-            </div>
-          </div>
-        </div>
+
+
 
       </div>
       <!-- /.row -->
@@ -132,7 +106,7 @@
     <!-- Footer -->
     <footer class="py-5 bg-dark">
       <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2018</p>
+        <p class="m-0 text-center text-white">Copyright &copy; Dinner Planner 2018</p>
       </div>
       <!-- /.container -->
     </footer>

@@ -28,3 +28,28 @@ body {
   text-align: center;
   font-size: 0.6em;
 }
+
+.jumbotron {
+  padding: 0.5em 0.5em;
+}
+
+.adding-cat {
+  margin: 1em 0;
+}
+
+.profile-photo {
+  padding: 0 0 0 0.2em;
+}
+
+.username {
+  color: #71a2d8;
+}
+
+.tap {
+  margin: 0 0 0 1em;
+}
+
+.flashes {
+  margin-top: 2em;
+  text-align: center;
+}

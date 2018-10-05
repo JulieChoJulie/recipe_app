@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, abort, g
+from flask import Flask, app, render_template, request, redirect, jsonify, url_for, flash, abort, g
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, User, Category, Menu, Ingredient, Direction, WeeklyPlan
@@ -15,6 +15,10 @@ from flask import make_response
 import requests
 import os
 
+from datetime import timedelta
+
+
+
 app = Flask(__name__)
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
@@ -26,12 +30,22 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+@app.before_request
+def make_session_permanent():
+    login_session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=5)
 
 @app.route('/')
 @app.route('/recipes/')
 def recipeList():
     categories = session.query(Category).order_by(asc(Category.name))
     menu = session.query(Menu).order_by(asc(Menu.name))
+    pic = []
+    for cat in categories:
+        menuPic = session.query(Menu).filter_by(category_id=cat.id).first()
+        pic.append(menuPic.picture)
+    pic.reverse()
+
     res =[]
     for category in categories:
         list = category.name.split()
@@ -42,16 +56,17 @@ def recipeList():
             session.commit()
     print(login_session)
     if 'username' not in login_session:
-        return render_template('publicRecipes.html', categories=categories)
+        return render_template('index.html', categories=categories, pic=pic)
     else:
         dates = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         dates.reverse()
         plans = planner(login_session['user_id'])
+        user = login_session
         for plan  in plans:
             menu = session.query(Menu).filter_by(id=plan).one()
             res.append(menu)
 
-        return render_template('index.html', categories=categories, list=res, dates=dates)
+        return render_template('recipes.html', categories=categories, list=res, dates=dates, pic=pic, user=user)
 
 @app.route('/recipes/refresh/')
 def refresh():
@@ -214,9 +229,11 @@ def gdisconnect():
         del login_session['user_id']
         del login_session['email']
         del login_session['picture']
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        # response = make_response(json.dumps('Successfully disconnected.'), 200)
+        # response.headers['Content-Type'] = 'application/json'
+        # return response
+        flash("Successfully Logged out!")
+        return redirect(url_for('recipeList'))
     else:
         response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
