@@ -1,26 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h3>{{category.name}}</h3>
 
-{% for item in items %}
-		<a href = "{{url_for('menuDetails', category_id = category_id, menu_id=item.id)}}">
-			<div class="row">
-				<div class="col-md-1"></div>
-					<div class="col-md-10 restaurant-list">
-						<h3>{{item.name}}</h3>
-						<span><img src="{{item.picture}}" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';"></span>
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Recipes">
+    <meta name="author" content="Julie Cho">
+
+    <title>Dinner Planner</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/custom-menu.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{url_for('recipeList')}}">Dinner Planner</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('recipeList')}}">Home
+              </a>
+            <!--</li>-->
+            <!--<li class="nav-item">-->
+              <!--<a class="nav-link" href="#">About</a>-->
+            <!--</li>-->
+            <!--<li class="nav-item">-->
+              <!--<a class="nav-link" href="#">Services</a>-->
+            <!--</li>-->
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('showLogin')}}">Login</a>
+            </li>
+
+          </ul>
+        </div>
+		 </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+      <!-- Page Heading -->
+      <h1 class="my-4">
+          <!--<a class="btn btn-primary btn-sm " href = "{{url_for('editRecipe', category_id = category_id)}}">Edit this category</a>-->
+        <!--<a class="btn btn-primary btn-sm " href = "{{url_for('deleteRecipe', category_id = category_id)}}">Delete this category</a>-->
+          Category: <small>{{category.name}}</small>
+      </h1>
 
 
+      <!-- Project Iterative -->
+          {% for item in items %}
+          <div class="row">
+            <div class="col-md-7">
+            <a href="{{url_for('menuDetails', category_id = category_id, menu_id=item.id)}}">
+                <img class="img-fluid rounded mb-3 mb-md-0" src="{{item.picture}}" alt="food-photo" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';" style="width:100%;">
+            </a>
+            </div>
+            <div class="col-md-5">
+              <h5>{{item.name}}</h5>
+                {% if item.servings %}
+              <p>Servings: {{item.servings}}</p>
+                {% endif %}
+                {% if item.calories: %}
+              <p>Calories/serving: {{item.calories}}</p>
+                {% endif %}
+                {% if item.minute: %}
+              <p>Time: {{item.hour}} hour {{item.minute}} minutes</p>
+                {% endif %}
+              <a class="btn btn-primary" href="{{url_for('menuDetails', category_id = category_id, menu_id=item.id)}}">View Detail</a>
+            </div>
+          </div>
+         <!-- /.row -->
+          <hr>
+	      {% endfor %}
 
-					</div>
-				<div class="col-md-1"></div>
-			</div>
-		</a>
-	{% endfor %}
-</body>
+      <hr>
+
+    </div>
+    <!-- /.container -->
+
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Dinner Planner 2018</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+   <!-- Bootstrap core JavaScript -->
+    <script src="/static/bootstrap/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+
 </html>

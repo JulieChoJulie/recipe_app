@@ -33,7 +33,7 @@ session = DBSession()
 @app.before_request
 def make_session_permanent():
     login_session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=3)
 
 @app.route('/')
 @app.route('/recipes/')
@@ -43,7 +43,10 @@ def recipeList():
     pic = []
     for cat in categories:
         menuPic = session.query(Menu).filter_by(category_id=cat.id).first()
-        pic.append(menuPic.picture)
+        if menuPic is None:
+            pic.append("")
+        else:
+            pic.append(menuPic.picture)
     pic.reverse()
 
     res =[]
@@ -56,7 +59,7 @@ def recipeList():
             session.commit()
     print(login_session)
     if 'username' not in login_session:
-        return render_template('index.html', categories=categories, pic=pic)
+        return render_template('publicRecipes.html', categories=categories, pic=pic)
     else:
         dates = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         dates.reverse()
@@ -292,9 +295,9 @@ def menuList(category_id):
         session.add(category)
         session.commit()
     if login_session.get('user_id') == creator.id:
-        return render_template('menu.html', category=category, category_id=category_id, items=items)
+        return render_template('menu.html', category=category, category_id=category_id, items=items, user=login_session)
     elif 'username' in login_session:
-        return render_template('userMenu.html', category=category, category_id=category_id, items=items)
+        return render_template('userMenu.html', category=category, category_id=category_id, items=items, user=login_session)
     else:
         return render_template('publicMenu.html', category=category,category_id=category_id, items=items)
 
