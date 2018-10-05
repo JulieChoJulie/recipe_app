@@ -361,9 +361,11 @@ def deleteRecipe(category_id):
 @app.route('/recipes/<int:category_id>/<int:menu_id>/')
 def menuDetails(category_id, menu_id):
     item = session.query(Menu).filter_by(id=menu_id).one()
+    menus = session.query(Menu).filter_by(category_id=category_id).all()
     ingredients = session.query(Ingredient).filter_by(menu_id=item.id).first()
     directions = session.query(Direction).filter_by(menu_id=item.id).first()
     creator = getUserInfo(item.user_id)
+    category = session.query(Category).filter_by(id=item.category_id).one()
 
     if directions is not None:
         directions = session.query(Direction).filter_by(menu_id=item.id).all()
@@ -376,9 +378,9 @@ def menuDetails(category_id, menu_id):
 
     if creator.id == login_session.get('user_id'):
         print "here"
-        return render_template('menuDetails.html', category_id=category_id, item=item, ingredients=ingredients, directions=directions)
+        return render_template('index-DETAILS.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
     else:
-        return render_template('publicMenuDetails.html', category_id=category_id, item=item, ingredients=ingredients, directions=directions)
+        return render_template('index-DETAILS.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
 
 # JSON APIs to view details of menu
 @app.route('/recipes/<int:category_id>/<int:menu_id>/json/')
