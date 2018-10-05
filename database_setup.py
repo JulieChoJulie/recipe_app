@@ -3,8 +3,14 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
+from passlib.apps import custom_app_context as pwd_context
+import random, string
+
+
 
 Base = declarative_base()
+secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+
 
 class User(Base):
     __tablename__ = 'user'
@@ -82,10 +88,20 @@ class Direction(Base):
 
     @property
     def serialize(self):
+
         return {
             'id': self.id,
             'direction': self.direction,
         }
+
+class WeeklyPlan(Base):
+    __tablename__='weekly_plan'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, ForeignKey('menu.id'))
+    menu = relationship(Menu)
+    date = Column(String(10))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
 engine = create_engine('sqlite:///recipes.db')
 Base.metadata.create_all(engine)

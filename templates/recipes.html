@@ -17,7 +17,12 @@
     {% endwith %}
 
 </div>
-
+<a href="{{url_for('refresh')}}">Refresh Planner</a>
+{% for el in list %}
+<span><a href="{{url_for('menuDetails', category_id=el.category_id, menu_id=el.id)}}"><img name='{{el.name}}' src="{{el.picture}}" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';"></a></span>
+	{{el.name}}
+	</br>
+{% endfor %}
 
 <a href = "{{url_for('newRecipe')}}">Add new category</a>
 {% for category in categories %}

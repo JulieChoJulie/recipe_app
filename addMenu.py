@@ -32,6 +32,8 @@ User1 = User(name="Admin", email="h32cho_admin@gmail.com",
 session.add(User1)
 session.commit()
 
+
+
 for obj in jsondata:
     if session.query(Category).filter_by(name=obj['category']).one_or_none() is None:
         cat1 = Category(name=obj['category'], user_id=User1.id)
@@ -45,7 +47,6 @@ for obj in jsondata:
         menu1 = session.query(Menu).filter_by(name=obj['name']).one()
         for ingre in obj['ingredients']:
             ingredient = Ingredient(amount=ingre['amount'], description=ingre['description'], menu_id=menu1.id)
-
             session.add(ingredient)
             session.commit()
         for direction in obj['directions']:
