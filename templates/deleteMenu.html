@@ -1,14 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="{{url_for('deleteMenu', category_id=category.id, menu_id=item.id)}}" method="post">
-        <h3>Menu Name: {{item.name}}</h3>
-        <a href="{{url_for('menuDetails', category_id=item.category_id, menu_id=item.id)}}">Cancel</a>
-        <input type="submit" value="Submit">
-    </form>
-</body>
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Recipes">
+    <meta name="author" content="Julie Cho">
+
+    <title>Dinner Planner</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/custom-menu.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{url_for('recipeList')}}">Dinner Planner</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('recipeList')}}">Home
+              </a>
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('gdisconnect')}}">Logout</a>
+            </li>
+			  <li class="nav-item username"><span class="nav-link username" href="">{{user.username}}</span></li>
+		  <div class="profile-photo"><img src="{{user.picture}}" alt="profile-photo" style="height:1.2em; margin:13px 0 0 0 ;"></div>
+
+          </ul>
+        </div>
+		 </div>
+    </nav>
+     <!-- Page Content -->
+    <div class="container">
+        <div class="row my-4">
+            <div class="col-12">
+            <form action="{{url_for('deleteMenu', category_id=category.id, menu_id=item.id)}}" method="post">
+                <h3 class="display-5">Delete this Menu: {{item.name}}</h3>
+                <div class="btn-group" style="float:right; margin-top:2em;">
+                <a class="btn btn-primary" href="{{url_for('menuDetails', category_id=item.category_id, menu_id=item.id)}}">Cancel</a>
+                <input class="btn btn-primary" type="submit" value="Submit">
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+  </br>
+  </br>
+  </br>
+  </br>
+  </br>
+  </br>
+  </br>
+  </br>
+  </br>
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Dinner Planner 2018</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+   <!-- Bootstrap core JavaScript -->
+    <script src="/static/bootstrap/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+
 </html>

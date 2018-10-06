@@ -44,7 +44,8 @@
             <div class="row my-4">
                 <div class="col-12">
                     <h3 class="display-4"><strong>{{category.name}}</strong></h3>
-                    <h3 class="display-4">{{item.name}}</h3>
+                    <h3 class="display-4 inline">{{item.name}}</h3>
+                    <a class="inline" href="{{url_for('deleteMenu', category_id=category.id, menu_id=item.id)}}"><img src="/static/images/delete.png" alt="delete-icon"></a>
 
 
 <form method="post" action="{{url_for('editMenu', category_id=category.id, menu_id=item.id)}}">

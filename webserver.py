@@ -501,7 +501,7 @@ def deleteMenu(category_id, menu_id):
         return redirect(url_for('menuList', category_id=category.id))
 
     else:
-        return render_template('deleteMenu.html', category=category, item=menu)
+        return render_template('deleteMenu.html', category=category, item=menu, user=login_session)
 
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session['email'], picture=login_session['picture'])
