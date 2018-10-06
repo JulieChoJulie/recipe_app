@@ -32,13 +32,6 @@
             <li class="nav-item">
               <a class="nav-link" href="{{url_for('recipeList')}}">Home
               </a>
-            <!--</li>-->
-            <!--<li class="nav-item">-->
-              <!--<a class="nav-link" href="#">About</a>-->
-            <!--</li>-->
-            <!--<li class="nav-item">-->
-              <!--<a class="nav-link" href="#">Services</a>-->
-            <!--</li>-->
             <li class="nav-item">
               <a class="nav-link" href="{{url_for('gdisconnect')}}">Logout</a>
             </li>
@@ -55,8 +48,6 @@
 
       <!-- Page Heading -->
       <h1 class="my-4">
-          <!--<a class="btn btn-primary btn-sm " href = "{{url_for('editRecipe', category_id = category_id)}}">Edit this category</a>-->
-        <!--<a class="btn btn-primary btn-sm " href = "{{url_for('deleteRecipe', category_id = category_id)}}">Delete this category</a>-->
           Category: <small>{{category.name}}</small>
           <a href="{{url_for('editRecipe', category_id=category.id)}}"><img src="/static/images/settings-icon.png" alt="setting-icon"></a>
       </h1>

@@ -32,19 +32,9 @@
             <li class="nav-item">
               <a class="nav-link" href="{{url_for('recipeList')}}">Home
               </a>
-            <!--</li>-->
-            <!--<li class="nav-item">-->
-              <!--<a class="nav-link" href="#">About</a>-->
-            <!--</li>-->
-            <!--<li class="nav-item">-->
-              <!--<a class="nav-link" href="#">Services</a>-->
-            <!--</li>-->
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('gdisconnect')}}">Logout</a>
+              <a class="nav-link" href="{{url_for('showLogin')}}">Login</a>
             </li>
-			  <li class="nav-item username"><span class="nav-link username" href="">{{user.username}}</span></li>
-		  <div class="profile-photo"><img src="{{user.picture}}" alt="profile-photo" style="height:1.2em; margin:13px 0 0 0 ;"></div>
-
           </ul>
         </div>
 		 </div>
@@ -76,19 +66,16 @@
           <div class="card mt-4">
             <img src="{{item.picture}}" onError="this.onerror=null;this.src='/static/images/food_image_alt.jpg';">
             <div class="card-body">
-              <h3 class="card-title">{{item.name}}<a href="{{url_for('editMenu', category_id=category.id, menu_id=item.id)}}"><img src="/static/images/settings-icon.png" alt="setting-icon"></a></h3>
-              <!--<p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente dicta fugit fugiat hic aliquam itaque facere, soluta. Totam id dolores, sint aperiam sequi pariatur praesentium animi perspiciatis molestias iure, ducimus!</p>-->
-              <!--<span class="text-warning">&#9733; &#9733; &#9733; &#9733; &#9734;</span>-->
-              <!--4.0 stars-->
+              <h3 class="card-title">{{item.name}}</h3>
               <p class="card-text">
                 {% if item.servings: %}
-              <span><img src="/static/images/servings.png">{{item.servings}}</span>
+              <span><img src="/static/images/servings.png">{{item.servings}} servings</span>
                 {% endif%}
                 {% if item.minute: %}
               <span><img src="/static/images/time.png">{{item.hour}} hour {{item.minute}} minutes</span>
                 {% endif%}
                 {% if item.calories: %}
-              <span><img src="/static/images/calories.png">{{item.calories}}</span>
+              <span><img src="/static/images/calories.png">{{item.calories}} calories/serving</span>
                 {% endif %}
               </p>
             </div>
@@ -110,16 +97,7 @@
                     <hr>
                     {% endif %}
 	            {% endfor %}
-              <!--<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>-->
-              <!--<small class="text-muted">Posted by Anonymous on 3/1/17</small>-->
-              <!--<hr>-->
-              <!--<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>-->
-              <!--<small class="text-muted">Posted by Anonymous on 3/1/17</small>-->
-              <!--<hr>-->
-              <!--<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>-->
-              <!--<small class="text-muted">Posted by Anonymous on 3/1/17</small>-->
-              <!--<hr>-->
-              <!--<a href="#" class="btn btn-success">Leave a Review</a>-->
+
             </div>
           </div>
           <!-- /.card -->

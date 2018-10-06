@@ -272,16 +272,16 @@ def newRecipe():
         return redirect('/login')
     if request.method == 'POST':
         valid = session.query(Category).filter_by(name = request.form['name']).one_or_none()
-        if valid is None:
+        if valid is None and request.form['name'].isalpha():
             newCat = Category(name = request.form['name'], user_id = login_session['user_id'])
             session.add(newCat)
             session.commit()
-            return redirect(url_for('recipeList'))
+            return redirect(url_for('recipeList', user=login_session))
         else:
-            abort(400, description="The category name you entered is already being used.")
+            abort(400, description="The category name you entered is already being used or it is not valid.")
 
     else:
-        return render_template('newRecipe.html')
+        return render_template('newRecipe.html', user=login_session)
 
 @app.route('/recipes/<int:category_id>/')
 def menuList(category_id):
@@ -329,21 +329,23 @@ def newMenu(category_id):
         else:
             abort(400, description="The menu name you entered is already being used.")
     else:
-        return render_template('newMenu.html', category=category)
+        return render_template('newMenu.html', category=category, user=login_session)
 
 @app.route('/recipes/<int:category_id>/edit/', methods=['GET', 'POST'])
 def editRecipe(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     if category.user_id != login_session.get('user_id'):
         return "<script>function myFunction() {alert('You are not authorized to edit this category.');}</script><body onload='myFunction()'>"
-
     if request.method == 'POST':
-        category.name = request.form['name']
-        session.add(category)
-        session.commit()
-        return redirect(url_for('recipeList'))
+        if request.form['name'].isalpha():
+            category.name = request.form['name']
+            session.add(category)
+            session.commit()
+            return redirect(url_for('recipeList'))
+        else:
+            return "<script>function myFunction() {alert('Please enter the valid category name to edit.');}</script><body onload='myFunction()'>"
     else:
-        return render_template('editRecipe.html', category=category)
+        return render_template('editRecipe.html', category=category, user=login_session)
 
 @app.route('/recipes/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteRecipe(category_id):
@@ -378,9 +380,9 @@ def menuDetails(category_id, menu_id):
 
     if creator.id == login_session.get('user_id'):
         print "here"
-        return render_template('index-DETAILS.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
+        return render_template('menuDetails.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
     else:
-        return render_template('index-DETAILS.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
+        return render_template('publicMenuDetails.html', category=category, menus=menus, item=item, ingredients=ingredients, directions=directions, user=login_session)
 
 # JSON APIs to view details of menu
 @app.route('/recipes/<int:category_id>/<int:menu_id>/json/')
@@ -421,8 +423,8 @@ def editMenu(category_id, menu_id):
         item.picture= request.form['picture']
         item.servings= request.form['servings']
         item.calories= request.form['calories']
-        item.hour= int(request.form['hour'])
-        item.minute=int(request.form['minute'])
+        item.hour= request.form['hour']
+        item.minute=request.form['minute']
         session.add(item)
         session.commit()
 
@@ -441,28 +443,42 @@ def editMenu(category_id, menu_id):
             elif len(description) ==0:
                 del amount[i]
                 del descriptions[i]
-            else:
+            elif session.query(Ingredient).filter_by(description=description).first() is None:
                 ingredient = Ingredient(amount=amt, description=description, menu_id=menu_id)
                 session.add(ingredient)
                 session.commit()
 
+        amounts =request.form.getlist('delete-amount')
+        descriptions = request.form.getlist('delete-description')
+        for description in descriptions:
+            if len(description) > 0:
+                ingredient = session.query(Ingredient).filter_by(description=description).one()
+                session.delete(ingredient)
+                session.commit()
+
         directions = request.form.getlist('direction')
 
-        for i in range(0, len(directions)):
-            direc = directions[i]
-            direc = direc.encode("utf-8")
-            if len(direc) == 0:
-                del directions[i]
-            else:
-                direction = Direction(menu_id=menu_id, direction=direc)
-                session.add(direction)
-                session.commit()
+        for direction in directions:
+            if len(direction) > 0:
+                valid = session.query(Direction).filter_by(direction=direction).first()
+                if valid is None:
+                    direction = Direction(menu_id=menu_id, direction=direction)
+                    session.add(direction)
+                    session.commit()
+
+        directions = request.form.getlist('delete-dir')
+        for direction in directions:
+            if len(direction) > 0:
+                valid = session.query(Direction).filter_by(direction=direction).first()
+                if valid is not None:
+                    session.delete(valid)
+                    session.commit()
 
         ingredients = session.query(Ingredient).filter_by(menu_id=menu_id).all()
         directions = session.query(Direction).filter_by(menu_id=menu_id).all()
         return redirect(url_for('menuDetails', category_id=category.id, menu_id=menu_id, ingredients=ingredients, directions=directions))
     else:
-        return render_template('editMenu.html', ingredients=ingredients, category=category, item=item, directions=directions)
+        return render_template('editMenu.html', ingredients=ingredients, category=category, item=item, directions=directions, user=login_session)
 
 @app.route('/recipes/<int:category_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 def deleteMenu(category_id, menu_id):

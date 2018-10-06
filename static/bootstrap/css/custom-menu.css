@@ -8,6 +8,18 @@ body {
   padding-top: 54px;
 }
 
+@media (max-width: 500px) {
+  .display-4 {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 991px) {
+  .display-4 {
+    font-size: 2em;
+  }
+}
+
 @media (min-width: 992px) {
   body {
     padding-top: 56px;
@@ -25,4 +37,20 @@ body {
 
 h1.my-4 {
   margin-top: 1em!important;
+}
+
+.buttons{
+  float: right;
+}
+
+.btn-primary{
+    margin: 0.3em 0.1em;
+}
+
+.inline {
+  display: inline;
+}
+
+.opacity {
+  opacity: 0.2;
 }
