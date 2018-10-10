@@ -34,7 +34,7 @@
 
 
 ## Acknowldgement
-Udacity - Full Stack Web Developer NanoDegree Program
-Icons made by Freepik from www.flaticon.com 
-Icon made by Those Icons from www.flaticon.com 
-Icon made by Smashicons from www.flaticon.com 
+    Udacity - Full Stack Web Developer NanoDegree Program
+    Icons made by Freepik from www.flaticon.com 
+    Icon made by Those Icons from www.flaticon.com 
+    Icon made by Smashicons from www.flaticon.com 
