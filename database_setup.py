@@ -4,12 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from passlib.apps import custom_app_context as pwd_context
-import random, string
-
+import random
+import string
 
 
 Base = declarative_base()
-secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+secret_key = ''.join(random.choice(
+    string.ascii_uppercase + string.digits) for x in xrange(32))
 
 
 class User(Base):
@@ -20,10 +21,11 @@ class User(Base):
     email = Column(String(250))
     picture = Column(String(250))
 
+
 class Category(Base):
     __tablename__ = 'category'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
@@ -35,10 +37,11 @@ class Category(Base):
             'name': self.name
         }
 
+
 class Menu(Base):
     __tablename__ = 'menu'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False)
     picture = Column(String(250))
     servings = Column(Integer)
     calories = Column(Integer)
@@ -63,11 +66,12 @@ class Menu(Base):
             'user_id': self.user_id
         }
 
+
 class Ingredient(Base):
     __tablename__ = 'ingredient'
-    id = Column(Integer, primary_key = True)
+    id = Column(Integer, primary_key=True)
     amount = Column(String(50))
-    description =  Column(String(80))
+    description = Column(String(80))
     menu_id = Column(Integer, ForeignKey('menu.id'))
     menu = relationship(Menu)
 
@@ -79,9 +83,10 @@ class Ingredient(Base):
             'description': self.description,
         }
 
+
 class Direction(Base):
     __tablename__ = 'direction'
-    id = Column(Integer, primary_key = True)
+    id = Column(Integer, primary_key=True)
     direction = Column(String(350))
     menu_id = Column(Integer, ForeignKey('menu.id'))
     menu = relationship(Menu)
@@ -94,14 +99,16 @@ class Direction(Base):
             'direction': self.direction,
         }
 
+
 class WeeklyPlan(Base):
-    __tablename__='weekly_plan'
+    __tablename__ = 'weekly_plan'
     id = Column(Integer, primary_key=True)
     menu_id = Column(Integer, ForeignKey('menu.id'))
     menu = relationship(Menu)
     date = Column(String(10))
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+
 
 engine = create_engine('sqlite:///recipes.db')
 Base.metadata.create_all(engine)
