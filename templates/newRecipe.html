@@ -64,8 +64,8 @@
                 <form action="{{url_for('newRecipe')}}" method="post">
                     <h3 class="display-4">Adding New Category</h3>
                     <div>
-                        Name:
-                        <input class="input-group-text" type="text" name="name" style="margin-top:1em; margin-left:1em;">
+                        Name*(Required):
+                        <input required class="input-group-text" type="text" name="name" style="margin-top:1em; margin-left:1em;">
                     </div>
                     <div class="buttons" style="float:right; margin-top:2em">
                     <a class="btn btn-primary" href="{{url_for('recipeList')}}">Cancel</a>

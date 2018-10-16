@@ -409,6 +409,13 @@ def menuDetails(category_id, menu_id):
                                ingredients=ingredients,
                                directions=directions,
                                user=login_session)
+    elif login_session.get('username'):
+        return render_template('userMenuDetails.html',
+                               category=category,
+                               menus=menus, item=item,
+                               ingredients=ingredients,
+                               directions=directions,
+                               user=login_session)
     else:
         return render_template('publicMenuDetails.html',
                                category=category,

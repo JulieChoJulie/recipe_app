@@ -49,8 +49,8 @@
                 <h1 class="display-2">{{category.name}}</h1>
             <form action="{{url_for('editRecipe', category_id=category.id)}}" method="post">
                 <h3 class="display-5"Edit the Name of this Category</h3>
-                <span>New Name of Category: </span>
-                <input class="input-group-text" type="text" name="name" placeholder="{{category.name}}" value="{{category.name}}" style="margin-top:1em; margin-left:1em;">
+                <span>New Name of Category*(Required): </span>
+                <input required class="input-group-text" type="text" name="name" placeholder="{{category.name}}" value="{{category.name}}" style="margin-top:1em; margin-left:1em;">
                 <input class="btn btn-primary" type="submit" value="Edit" style="float:right; margin-top:2em;">
             </form>
             </div>

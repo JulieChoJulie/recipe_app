@@ -49,7 +49,7 @@
 
 
 <form method="post" action="{{url_for('editMenu', category_id=category.id, menu_id=item.id)}}">
-    <div>Name: <input class="input-group-text" type="text" name="name" value="{{item.name}}"></div>
+    <div>Name*(required): <input required class="input-group-text" type="text" name="name" value="{{item.name}}"></div>
     <div>Servings: <input class="input-group-text" type="text" name="servings" value="{{item.servings}}"></div>
     <div>Calories/Serving: <input class="input-group-text" type="text" name="calories" value="{{item.calories}}"></div>
     <div>Picture: <input class="input-group-text" type="text" name="picture" value="{{item.picture}}"></div>
@@ -69,7 +69,7 @@
         <img class="delete-ing inline" src="/static/images/delete.png" alt="delete-icon" styl="margin:1em;">
 
         <div style="margin-left:1em;">
-            Amount:
+            Amount (optional):
             <div>
                 <input class="input-group-text inline" name="amount" value="{{ingredient.amount}}">
             </div>
@@ -112,7 +112,7 @@
 
 <div class="btn-group btn-group-lg" style="margin:5em;">
 <a class="btn btn-primary " href="{{url_for('menuDetails', category_id=category.id, menu_id=item.id)}}">Cancel</a>
-<input class="btn btn-primary" type="submit" value="Submit">
+<input class="btn btn-primary submit" type="submit" value="Submit">
 </div>
 </form>
 </div>
