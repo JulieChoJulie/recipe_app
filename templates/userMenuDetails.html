@@ -112,8 +112,10 @@
             <div class="card-body">
 
               {% for direction in directions %}
-                <small class="text-muted">{{loop.index}}</small>
-                <p>{{direction.direction}}</p>
+                {% if direction.direction|length > 0 %}
+                  <small class="text-muted">{{loop.index}}</small>
+                  <p>{{direction.direction}}</p>
+                {% endif %}
                 {% if directions|length != loop.index %}
                     <hr>
                 {% endif %}

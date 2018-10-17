@@ -1,9 +1,22 @@
-from flask import Flask, app, render_template, request, \
-    redirect, jsonify, url_for, flash, abort, g
+from flask import (Flask,
+                   app,
+                   render_template,
+                   request,
+                   redirect,
+                   jsonify,
+                   url_for,
+                   flash,
+                   abort,
+                   g)
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User, Category, Menu, \
-    Ingredient, Direction, WeeklyPlan
+from database_setup import (Base,
+                            User,
+                            Category,
+                            Menu,
+                            Ingredient,
+                            Direction,
+                            WeeklyPlan)
 
 from flask import session as login_session
 import random
@@ -16,11 +29,14 @@ from flask import make_response
 
 import requests
 import os
+from functools import wraps
+
 
 from datetime import timedelta
 
 app = Flask(__name__)
 
+# Store google client id
 CLIENT_ID = json.loads(open('client_secrets.json', 'r')
                        .read())['web']['client_id']
 
@@ -30,13 +46,22 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-
+# Automatically logout login_session after 5 min
 @app.before_request
 def make_session_permanent():
     login_session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=3)
+    app.permanent_session_lifetime = timedelta(minutes=5)
 
-
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'username' in login_session:
+            return f(*args, **kwargs)
+        else:
+            flash("You need to login first")
+            return redirect(url_for('showLogin'))
+    return wrap
+# Homepage
 @app.route('/')
 @app.route('/recipes/')
 def recipeList():
@@ -75,7 +100,7 @@ def recipeList():
                                categories=categories, list=res,
                                dates=dates, pic=pic, user=user)
 
-
+# Refresh weekly dinner plan and redirect to the homepage
 @app.route('/recipes/refresh/')
 def refresh():
     plans = session.query(WeeklyPlan)\
@@ -92,7 +117,7 @@ def recipeListJSON():
     categories = session.query(Category).all()
     return jsonify(CategoryList=[c.serialize for c in categories])
 
-
+# Login page
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -100,7 +125,7 @@ def showLogin():
     login_session['state'] = state
     return render_template('login.html', STATE=state, client_id=CLIENT_ID)
 
-
+# Get customized & stored weekly planner for the logged in user.
 def planner(user_id):
     user = session.query(User).filter_by(id=user_id).one
     plan = session.query(WeeklyPlan).filter_by(user_id=user_id).first()
@@ -123,6 +148,7 @@ def planner(user_id):
             session.add(plan)
             session.commit()
         return main
+    # If it is the first time user logged in
     else:
         res = []
         plan = session.query(WeeklyPlan).filter_by(user_id=user_id).all()
@@ -130,7 +156,7 @@ def planner(user_id):
             res.append(el.menu_id)
         return res
 
-
+# Google log in
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 
@@ -219,7 +245,7 @@ def gconnect():
     flash("You are now logged in as %s " % login_session['username'])
     return output
 
-
+# Log out
 @app.route('/gdisconnect')
 def gdisconnect():
     # Only disconnect a connected user.
@@ -248,11 +274,10 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-
+# Add new Category
 @app.route('/recipes/new/', methods=['GET', 'POST'])
+@login_required
 def newRecipe():
-    if 'username' not in login_session:
-        return redirect('/login')
     if request.method == 'POST':
         valid = session.query(Category)\
             .filter_by(name=request.form['name']).one_or_none()
@@ -269,27 +294,35 @@ def newRecipe():
     else:
         return render_template('newRecipe.html', user=login_session)
 
-
+# Show Menu List under a specific category.
 @app.route('/recipes/<int:category_id>/')
 def menuList(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
-    items = session.query(Menu).filter_by(category_id=category_id).all()
+    item = session.query(Menu).filter_by(category_id=category_id).first()
+    if item is not None:
+        items = session.query(Menu).filter_by(category_id=category_id).all()
+    else:
+        items =[]
     creator = getUserInfo(category.user_id)
     list = category.name.split()
+    # Make sure remove all numbers in their category name (due to database)
     if list[0][0].isdigit():
         del list[0]
         category.name = " ".join(list)
         session.add(category)
         session.commit()
+    # If the user is the creator, show the menu page with editing option
     if login_session.get('user_id') == creator.id:
         return render_template('menu.html',
                                category=category,
                                category_id=category_id,
                                items=items, user=login_session)
+    # If the user is logged in, show the logout btn on nav bar
     elif 'username' in login_session:
         return render_template('userMenu.html',
                                category=category, category_id=category_id,
                                items=items, user=login_session)
+    # If the user is NOT logged in, show the login btn on nav bar
     else:
         return render_template('publicMenu.html',
                                category=category, category_id=category_id,
@@ -302,15 +335,15 @@ def menuListJSON(category_id):
     items = session.query(Menu).filter_by(category_id=category_id).all()
     return jsonify(CategoryList=[item.serialize for item in items])
 
-
+# Add new menu under a category
 @app.route('/recipes/<int:category_id>/new/', methods=['GET', 'POST'])
+@login_required
 def newMenu(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
-    if 'username' not in login_session:
-        return redirect('/login')
     if request.method == 'POST':
         valid = session.query(Menu)\
             .filter_by(name=request.form['name']).one_or_none()
+        # Prevent from making a duplicate
         if valid is None:
             menu = Menu(user_id=login_session['user_id'],
                         name=request.form['name'],
@@ -324,16 +357,85 @@ def newMenu(category_id):
             session.commit()
             addedmenu = session.query(Menu)\
                 .filter_by(name=request.form['name']).one()
-            direction = Direction(
-                menu_id=addedmenu.id, direction=request.form['direction'])
-            session.add(direction)
-            session.commit()
-            ingredient = Ingredient(menu_id=addedmenu.id,
-                                    amount=request.form['amount'],
-                                    description=request.form['description'])
-            session.add(ingredient)
-            session.commit()
+
+            amount = request.form.getlist('amount')
+            descriptions = request.form.getlist('description')
+
+            # Store ingredients
+            for i in range(0, len(descriptions)):
+                description = descriptions[i]
+                amt = amount[i]
+                amt = amt.encode("utf-8")
+                description = description.replace('\u00b0', '')
+                description = description.replace('\u00a0', '')
+                # If the description is empty while amt is filled
+                if len(description) == 0 and len(amount[i]) != 0:
+                    abort(400,
+                          description="You only entered "
+                                      "the amount of ingredient: "
+                                      "description is missing.")
+                # If the description is empty, ignore it.
+                elif len(description) == 0:
+                    del amount[i]
+                    del descriptions[i]
+                # If the description is filled.
+                else:
+                    ingredient = session.query(Ingredient) \
+                        .filter_by(description=description).first()
+                    if ingredient is None:
+                        ingredient = Ingredient(amount=amt,
+                                                description=description,
+                                                menu_id=addedmenu.id)
+                        session.add(ingredient)
+                        session.commit()
+                    else:
+                        # Update amount
+                        if ingredient.amount != amt:
+                            ingredient.amount = amt
+                            session.add(ingredient)
+                            session.commit()
+
+            # Ignore all ingredients that a user clicked 'delete'
+            amounts = request.form.getlist('delete-amount')
+            descriptions = request.form.getlist('delete-description')
+            for description in descriptions:
+                if len(description) > 0:
+                    ingredient = session.query(Ingredient) \
+                        .filter_by(description=description).one()
+                    session.delete(ingredient)
+                    session.commit()
+
+            # Add directions in database
+            directions = request.form.getlist('direction')
+
+            for direction in directions:
+                # Make sure direction is filled
+                if len(direction) > 0:
+                    valid = session.query(Direction) \
+                        .filter_by(direction=direction).first()
+                    # Prevent from making a duplicate
+                    if valid is None:
+                        direction = Direction(menu_id=addedmenu.id,
+                                              direction=direction)
+                        session.add(direction)
+                        session.commit()
+            # Delete the directions from our database
+            directions = request.form.getlist('delete-dir')
+            for direction in directions:
+                if len(direction) > 0:
+                    valid = session.query(Direction) \
+                        .filter_by(direction=direction).first()
+                    # If the data was stored in our database
+                    if valid is not None:
+                        session.delete(valid)
+                        session.commit()
+
+            ingredients = session.query(Ingredient) \
+                .filter_by(menu_id=addedmenu.id).all()
+            directions = session.query(Direction) \
+                .filter_by(menu_id=addedmenu.id).all()
             return redirect(url_for('menuList', category_id=category.id))
+
         else:
             abort(400,
                   description="The menu name you "
@@ -343,10 +445,12 @@ def newMenu(category_id):
                                category=category,
                                user=login_session)
 
-
+# Edit Category
 @app.route('/recipes/<int:category_id>/edit/', methods=['GET', 'POST'])
+@login_required
 def editRecipe(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
+    # The user has to be the creator of this category
     if category.user_id != login_session.get('user_id'):
         return "<script>function myFunction() " \
                "{alert('You are not authorized to edit this category.');}" \
@@ -366,10 +470,12 @@ def editRecipe(category_id):
                                category=category,
                                user=login_session)
 
-
+# Delete Category
 @app.route('/recipes/<int:category_id>/delete/', methods=['GET', 'POST'])
+@login_required
 def deleteRecipe(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
+    # The user has to be the one who created this category.
     if category.user_id != login_session.get('user_id'):
         return "<script>function myFunction() {" \
                "alert('You are not authorized to delete this category.');}" \
@@ -382,7 +488,7 @@ def deleteRecipe(category_id):
     else:
         return render_template('deleteRecipe.html', category=category)
 
-
+# Show the menu
 @app.route('/recipes/<int:category_id>/<int:menu_id>/')
 def menuDetails(category_id, menu_id):
     item = session.query(Menu).filter_by(id=menu_id).one()
@@ -401,7 +507,8 @@ def menuDetails(category_id, menu_id):
             .filter_by(menu_id=item.id).all()
     else:
         ingredients = []
-
+    # If the user is not the creator,
+    # the user will not be able to see setting icon
     if creator.id == login_session.get('user_id'):
         return render_template('menuDetails.html',
                                category=category,
@@ -409,6 +516,7 @@ def menuDetails(category_id, menu_id):
                                ingredients=ingredients,
                                directions=directions,
                                user=login_session)
+    # if the user is logged in, logout icon on nav bar
     elif login_session.get('username'):
         return render_template('userMenuDetails.html',
                                category=category,
@@ -416,6 +524,7 @@ def menuDetails(category_id, menu_id):
                                ingredients=ingredients,
                                directions=directions,
                                user=login_session)
+    # if the user is not logged in, login icon on nav bar
     else:
         return render_template('publicMenuDetails.html',
                                category=category,
@@ -441,14 +550,16 @@ def menuDetailsJSON(category_id, menu_id):
     res.append(obj)
     return jsonify(MenuDetails=res)
 
-
+# Edit the menu
 @app.route('/recipes/<int:category_id>/<int:menu_id>/edit',
            methods=['GET', 'POST'])
+@login_required
 def editMenu(category_id, menu_id):
     category = session.query(Category).filter_by(id=category_id).one()
     item = session.query(Menu).filter_by(id=menu_id).one()
     ingredients = session.query(Ingredient).filter_by(menu_id=item.id).first()
     directions = session.query(Direction).filter_by(menu_id=item.id).first()
+    # The user has to be the one who created this menu.
     if item.user_id != login_session.get('user_id'):
         return "<script>function myFunction() {" \
                "alert('You are not authorized to edit this menu.');}" \
@@ -464,7 +575,6 @@ def editMenu(category_id, menu_id):
     else:
         ingredients = []
     if request.method == 'POST':
-        # age = request.form.get('age', type=int)
         item.name = request.form['name']
         item.picture = request.form['picture']
         item.servings = request.form['servings']
@@ -477,29 +587,41 @@ def editMenu(category_id, menu_id):
         amount = request.form.getlist('amount')
         descriptions = request.form.getlist('description')
 
+        # Store ingredients
         for i in range(0, len(descriptions)):
             description = descriptions[i]
             amt = amount[i]
             amt = amt.encode("utf-8")
-            # description = description.encode("utf-8")
             description = description.replace('\u00b0', '')
             description = description.replace('\u00a0', '')
+            # If the description is empty while amt is filled
             if len(description) == 0 and len(amount[i]) != 0:
                 abort(400,
                       description="You only entered "
                                   "the amount of ingredient: "
                                   "description is missing.")
+            # If the description is empty, ignore it.
             elif len(description) == 0:
                 del amount[i]
                 del descriptions[i]
-            elif session.query(Ingredient)\
-                    .filter_by(description=description).first() is None:
-                ingredient = Ingredient(amount=amt,
-                                        description=description,
-                                        menu_id=menu_id)
-                session.add(ingredient)
-                session.commit()
+            # If the description is filled.
+            else:
+                ingredient = session.query(Ingredient)\
+                    .filter_by(description=description).first()
+                if ingredient is None:
+                    ingredient = Ingredient(amount=amt,
+                                            description=description,
+                                            menu_id=menu_id)
+                    session.add(ingredient)
+                    session.commit()
+                else:
+                    # Update amount
+                    if ingredient.amount != amt:
+                        ingredient.amount = amt
+                        session.add(ingredient)
+                        session.commit()
 
+        # Ignore all ingredients that a user clicked 'delete'
         amounts = request.form.getlist('delete-amount')
         descriptions = request.form.getlist('delete-description')
         for description in descriptions:
@@ -509,23 +631,27 @@ def editMenu(category_id, menu_id):
                 session.delete(ingredient)
                 session.commit()
 
+        # Add directions in database
         directions = request.form.getlist('direction')
 
         for direction in directions:
+            # Make sure direction is filled
             if len(direction) > 0:
                 valid = session.query(Direction)\
                     .filter_by(direction=direction).first()
+                # Prevent from making a duplicate
                 if valid is None:
                     direction = Direction(menu_id=menu_id,
                                           direction=direction)
                     session.add(direction)
                     session.commit()
-
+        # Delete the directions from our database
         directions = request.form.getlist('delete-dir')
         for direction in directions:
             if len(direction) > 0:
                 valid = session.query(Direction)\
                     .filter_by(direction=direction).first()
+                # If the data was stored in our database
                 if valid is not None:
                     session.delete(valid)
                     session.commit()
@@ -550,11 +676,13 @@ def editMenu(category_id, menu_id):
 
 @app.route('/recipes/<int:category_id>/'
            '<int:menu_id>/delete', methods=['GET', 'POST'])
+@login_required
 def deleteMenu(category_id, menu_id):
     ingredients = session.query(Ingredient).filter_by(menu_id=menu_id).all()
     directions = session.query(Direction).filter_by(menu_id=menu_id).all()
     menu = session.query(Menu).filter_by(id=menu_id).one_or_none()
     category = session.query(Category).filter_by(id=category_id).one()
+    # The user has to be the creator of this menu
     if menu.user_id != login_session.get('user_id'):
         return "<script>function myFunction() {" \
                "alert('You are not authorized to delete this menu.');}" \
@@ -577,7 +705,7 @@ def deleteMenu(category_id, menu_id):
                                item=menu,
                                user=login_session)
 
-
+# if it's a new user, store the user in our database
 def createUser(login_session):
     newUser = User(name=login_session['username'],
                    email=login_session['email'],
@@ -587,12 +715,12 @@ def createUser(login_session):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
-
+# Return the user
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
-
+# Check if the user is in our database
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -601,6 +729,7 @@ def getUserID(email):
         return None
 
 
+# When this program runs through python interpreter.
 if __name__ == '__main__':
     app.secret_key = "JJINBIN"
     app.debug = True

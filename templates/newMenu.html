@@ -59,13 +59,44 @@
                         <div>Minute: <input class="input-group-text" type="text" name="minute"></div>
                         </div>
                     </div>
-                    <div style="margin-top:1em;"><strong>Ingredients</strong>
-                         <div style="margin: 1em 1em;">
-                    <div>Ingredients-amount: </div><input class="input-group-text" type="text" name="amount">
-                    <div>Ingredients-description: </div><input class="input-group-text" type="text" name="description">
-                         </div>
-                    </div>
-                    <div><strong>Directions </strong></div><input class="input-group-text" type="text" name="direction">
+
+    <div style="margin-top:1em;"><strong>Ingredients</strong><img class="addIng" src="/static/images/plus.png" alt="plus image" style="margin:0.3em;">
+    <div class="ingLoop">
+        <small class="ing-numbering">1</small>
+        <img class="delete-ing inline" src="/static/images/delete.png" alt="delete-icon" styl="margin:1em;">
+
+        <div style="margin-left:1em;">
+            Amount (optional):
+            <div>
+                <input class="input-group-text inline" name="amount" value="">
+            </div>
+            <div>
+                Description:
+                <div>
+                    <input class="input-group-text inline" name="description" value="">
+                </div>
+            </div>
+	    </div>
+    </div>
+    </div>
+
+
+    <div style="margin-top:1em;"><strong>Directions</strong><img class="addDir" src="/static/images/plus.png" alt="plus image" style="margin:0.3em;">
+    <div class="dirLoop">
+
+            <small class="dir-numbering">1</small>
+            <img class="delete-dir inline" src="/static/images/delete.png" alt="delete-icon" styl="margin:1em;">
+            <div>
+                <input name="direction" value="" class="input-group-text inline">
+            </div>
+     </div>
+    </div>
+
+
+    </br>
+
+
+
 
                     <div class="buttons" style="margin-top:2em;">
                     <a class="btn btn-primary" href="{{url_for('menuList', category_id=category.id)}}">Cancel</a>
@@ -88,6 +119,70 @@
     <script src="/static/bootstrap/vendor/jquery/jquery.min.js"></script>
     <script src="/static/bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+
+
+    $(document).ready(function() {
+        $('.addIng').on('click', function(){
+            indexStr=$('.ing-numbering').last().text();
+            index = parseInt(indexStr)+1;
+            if (isNaN(index)){
+                index =1
+            }
+        $('.ingLoop').append(
+            "<small class='ing-numbering'>"+ index+"</small>" +
+            "<img class=\"delete-ing inline\" src=\"/static/images/delete.png\" alt=\"delete-icon\" styl=\"margin:1em;\">\n" +
+            "            Amount:\n" +
+            "            <div>\n" +
+            "                <input class=\"input-group-text inline\" name=\"amount\">\n" +
+            "            </div>\n" +
+            "            <div>\n" +
+            "                Description:\n" +
+            "                <div>\n" +
+            "                    <input class=\"input-group-text inline\" name=\"description\">\n" +
+            "                </div>\n" +
+            "            </div>\n" +
+            "\t    </div>"
+        );
+    });
+
+        $('.addDir').on('click', function(){
+            indexStr=$('.dir-numbering').last().text();
+            index = parseInt(indexStr)+1;
+            if (isNaN(index)){
+                index =1;
+            }
+        $('.dirLoop').append(
+            "<div>"+
+            "<small class=\"dir-numbering\">"+index+"</small>\n" +
+            "            <img class=\"delete-dir inline\" src=\"/static/images/delete.png\" alt=\"delete-icon\" styl=\"margin:1em;\">\n" +
+            "            <div>\n" +
+            "                <input name=\"direction\" class=\"input-group-text inline\">\n" +
+            "            </div>"+
+            "</div>"
+        );
+    });
+        $('.delete-dir').on('click', function(){
+            $(this).next().find(".input-group-text").attr("name", "delete-dir");
+            $(this).next().css('opacity', '0.2');
+            $(this).prev().css('opacity', '0.2');
+        });
+
+        $('.delete-ing').on('click', function(){
+            $input = $(this).next().find("div").find(".input-group-text");
+            if($input.attr('name').includes('delete')){
+                $input.first().attr('name', 'amount');
+                $input.last().attr('name', 'description')
+            } else {
+                $input.first().attr('name', 'delete-amount');
+                $input.last().attr('name', 'delete-description');
+
+            }
+            $(this).next().toggleClass("opacity");
+            $(this).prev().toggleClass("opacity");
+        });
+    });
+    </script>
   </body>
 
 </html>
